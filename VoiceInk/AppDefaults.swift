@@ -29,6 +29,7 @@ enum AppDefaults {
             "isSystemMuteEnabled": true,
             "audioResumptionDelay": 0.0,
             "isPauseMediaEnabled": false,
+            OtherMicrophoneMuter.enabledKey: false,
             CustomSoundManager.SoundType.start.builtInSoundKey: CustomSoundManager.SoundType.start.defaultBuiltInSound
                 .rawValue,
             CustomSoundManager.SoundType.stop.builtInSoundKey: CustomSoundManager.SoundType.stop.defaultBuiltInSound

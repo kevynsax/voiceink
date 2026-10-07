@@ -56,6 +56,24 @@ extension Recorder {
         )
     }
 
+    func showOtherMicrophoneMuteNotification(_ result: OtherMicrophoneMuter.MuteResult) {
+        switch result {
+        case .muted(let names):
+            NotificationManager.shared.showNotification(
+                title: String(format: String(localized: "Muted while dictating: %@"), names.joined(separator: ", ")),
+                type: .info
+            )
+        case .sharedWithRecordingDevice:
+            NotificationManager.shared.showNotification(
+                title: String(localized: "Another app is using this microphone and can hear you. Use a different mic for calls."),
+                type: .warning,
+                duration: 5.0
+            )
+        case .disabled, .nothingToMute:
+            break
+        }
+    }
+
     private func handleRecordingDeviceChange(_ notification: Notification) async {
         guard let request = notification.object as? RecordingDeviceChangeRequest else { return }
         guard let fallbackDeviceID = request.fallbackDeviceID else {
@@ -67,6 +85,8 @@ extension Recorder {
             deviceManager.recordingDeviceChangeFinished()
             return
         }
+
+        OtherMicrophoneMuter.shared.release(deviceID: fallbackDeviceID)
 
         do {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in

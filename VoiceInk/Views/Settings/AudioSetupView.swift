@@ -5,6 +5,7 @@ struct AudioSetupView: View {
     @ObservedObject private var audioDeviceManager = AudioDeviceManager.shared
     @ObservedObject private var mediaController = MediaController.shared
     @ObservedObject private var playbackController = PlaybackController.shared
+    @ObservedObject private var otherMicrophoneMuter = OtherMicrophoneMuter.shared
     @State private var microphoneSourceBeforePriorityOrder: MicrophoneSourceSelection = .systemDefault
     @State private var refreshIconRotation = 0.0
 
@@ -34,6 +35,11 @@ struct AudioSetupView: View {
                 Toggle("Mute Audio While Recording", isOn: $mediaController.isSystemMuteEnabled)
 
                 Toggle("Pause Media While Recording", isOn: $playbackController.isPauseMediaEnabled)
+
+                Toggle(isOn: $otherMicrophoneMuter.isEnabled) {
+                    Text("Mute Other Microphones While Recording")
+                    Text("Use a separate mic for calls, and the other side won't hear you dictate.")
+                }
 
                 LabeledContent("Resume Delay") {
                     resumeDelayMenu

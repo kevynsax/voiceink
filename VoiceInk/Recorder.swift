@@ -12,6 +12,7 @@ class Recorder: NSObject, ObservableObject {
     var recordingDeviceChangeObserver: NSObjectProtocol?
     private let mediaController = MediaController.shared
     private let playbackController = PlaybackController.shared
+    private let otherMicrophoneMuter = OtherMicrophoneMuter.shared
     /// Dedicated serial queue for hardware setup.
     let audioSetupQueue = DispatchQueue(label: "com.prakashjoshipax.voiceink.audioSetup", qos: .userInitiated)
     private let recordingAudioActionDelayNanoseconds: UInt64 = 220_000_000
@@ -68,6 +69,7 @@ class Recorder: NSObject, ObservableObject {
         audioRestorationTask = nil
         pauseMedia()
         muteSystemAudio()
+        let otherMicMuteResult = otherMicrophoneMuter.muteOtherMicrophones(recordingDeviceID: deviceID)
 
         let coreAudioRecorder = recorder ?? CoreAudioRecorder()
         coreAudioRecorder.onAudioChunk = onAudioChunk
@@ -87,12 +89,14 @@ class Recorder: NSObject, ObservableObject {
 
                 deviceID = fallbackDeviceID
                 resolution = retryResolution
+                otherMicrophoneMuter.release(deviceID: fallbackDeviceID)
                 deviceManager.beginRecordingSetup(deviceID: fallbackDeviceID)
                 try await startHardwareRecording(coreAudioRecorder, to: url, deviceID: fallbackDeviceID)
             }
 
             deviceManager.recordingDidStart(deviceID: deviceID)
             showRecordingDeviceNotification(for: deviceID, resolution: resolution)
+            showOtherMicrophoneMuteNotification(otherMicMuteResult)
             UserDefaults.standard.set(String(deviceID), forKey: "lastUsedMicrophoneDeviceID")
             resetAudioMeter()
         } catch {
@@ -121,6 +125,8 @@ class Recorder: NSObject, ObservableObject {
         onAudioChunk = nil
 
         resetAudioMeter()
+
+        otherMicrophoneMuter.restoreOtherMicrophones()
 
         audioRestorationTask?.cancel()
         audioRestorationTask = Task {

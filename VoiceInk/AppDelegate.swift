@@ -7,6 +7,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarManager?.applyActivationPolicy()
+        OtherMicrophoneMuter.shared.restoreAfterUnexpectedExit()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        OtherMicrophoneMuter.shared.restoreOtherMicrophones()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
