@@ -451,6 +451,7 @@ final class LicenseViewModel: ObservableObject {
     }
 
     private func resolvedState(at date: Date) -> LicenseState {
+        return .licensed  // local GPL build: licensing disabled
         if storedLicenseKey != nil,
             activationId != nil || !requiresActivation
         {
